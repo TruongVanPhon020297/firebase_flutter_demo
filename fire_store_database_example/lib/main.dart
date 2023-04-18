@@ -35,14 +35,28 @@ void main() async{
   // // print(students.length);
   // //
 
-  // FirebaseFirestore fireStore = FirebaseFirestore.instance;
-  //
-  // await fireStore.collection("hospitals").doc("ZoQuTjDk5A5MS9tcK5Re").collection("doctors").get()
-  //     .then((value){
-  //   value.docs.forEach((element) {
-  //     print("doctor ${element.data()}");
-  //   });
-  // });
+  FirebaseFirestore fireStore = FirebaseFirestore.instance;
+
+  String id = "";
+
+   await fireStore.collection("hospitals").add(
+    Hospital(
+        image: "Image",
+        address: "address",
+        star: 4,
+        hospitalName: "hospitalName",
+        information: "information",
+        knowledges: ["A","B","C"],
+        operatingTime: "operatingTime",
+        service: ["1","2","3"]
+    ).toJson()
+  ).then((value) {
+    id = value.id;
+  });
+
+  await fireStore.collection("hospitals").doc(id).collection("doctors").add(
+    {"full_name": "Trương Văn P", "star": 4, "years_of_experience": 7, "Information": "Cloud Firestore có thể được coi là phiên bản cải tiến của Realtime database, nó được cải tiến nhiều tính năng mới và tăng tốc độ truy vấn dữ liệu. Nếu bạn đang sử dụng Realtime Database thì việc chuyển sang sử dụng Cloud firestore khá dễ dàng", "knowledges": "[Chứng Chỉ 1, Chứng Chỉ 2]"}
+  );
 
   // fireStore.collection("students").doc("oAxlr3eN0fdj9Qkumvno").update(student.toJson());
 

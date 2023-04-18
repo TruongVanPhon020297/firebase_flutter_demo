@@ -83,4 +83,15 @@ class Hospital {
 
   }
 
+  Map<String,dynamic> toJson() => {
+    'image'  : image,
+    'address'  : address,
+    'star'      : star,
+    'hospital_name' : hospitalName,
+    'information' : information,
+    'knowledges' : knowledges,
+    'operating_time' : operatingTime,
+    'service' : service
+  };
+
 }
