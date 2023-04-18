@@ -9,37 +9,40 @@ void main() async{
 
   await Firebase.initializeApp();
 
-  FirebaseFirestore fireStore = FirebaseFirestore.instance;
 
-  Student student = Student(
-      fullName: "Nguyễn Văn D",
-      delivery: Delivery(
-          province: "Thừa Thiên",
-          district: "Phú",
-          ward: "Phú A"
-      )
-  );
 
-  // await fireStore.collection("students").doc().set(student.toJson())
-  // .then((value) => print("CREATE SUCCESS : ${fireStore.collection("students").doc().id}"));
+  // Student student = Student(
+  //     fullName: "Nguyễn Văn D",
+  //     delivery: Delivery(
+  //         province: "Thừa Thiên",
+  //         district: "Phú",
+  //         ward: "Phú A"
+  //     )
+  // );
+  //
+  // // await fireStore.collection("students").doc().set(student.toJson())
+  // // .then((value) => print("CREATE SUCCESS : ${fireStore.collection("students").doc().id}"));
+  //
+  // await fireStore.collection("students").add(student.toJson());
+  //
+  // // await fireStore.collection("students").get()
+  // // .then((value){
+  // //   value.docs.forEach((element) {
+  // //     students.add(Student.fromJson(element.data()));
+  // //   });
+  // // });
+  // //
+  // // print(students.length);
+  // //
 
-  await fireStore.collection("students").add(student.toJson());
-
-  // await fireStore.collection("students").get()
-  // .then((value){
+  // FirebaseFirestore fireStore = FirebaseFirestore.instance;
+  //
+  // await fireStore.collection("hospitals").doc("ZoQuTjDk5A5MS9tcK5Re").collection("doctors").get()
+  //     .then((value){
   //   value.docs.forEach((element) {
-  //     students.add(Student.fromJson(element.data()));
+  //     print("doctor ${element.data()}");
   //   });
   // });
-  //
-  // print(students.length);
-  //
-  await fireStore.collection("students").orderBy('fullName').get()
-      .then((value){
-    value.docs.forEach((element) {
-      print(element.data());
-    });
-  });
 
   // fireStore.collection("students").doc("oAxlr3eN0fdj9Qkumvno").update(student.toJson());
 
@@ -74,6 +77,65 @@ void main() async{
   runApp(const MyApp());
 }
 
+Future<List<Hospital>> getAllHospital() async {
+
+  FirebaseFirestore fireStore = FirebaseFirestore.instance;
+
+  List<Hospital> hospitals = [];
+
+  List<String> listId = [];
+
+  await fireStore.collection("hospitals").get()
+      .then((value){
+    for (var element in value.docs) {
+      hospitals.add(Hospital.fromJson(element.data()));
+      listId.add(element.id);
+    }
+  });
+
+  for(var e in listId) {
+    await fireStore.collection("hospitals").doc(e).collection("doctors").get()
+        .then((value){
+      value.docs.forEach((element) {
+        print("doctor ${element.data()}");
+      });
+    });
+  }
+
+  return hospitals;
+}
+
+
+Future<List> getAllDoctor() async {
+
+  FirebaseFirestore fireStore = FirebaseFirestore.instance;
+
+  List<Hospital> hospitals = [];
+
+  List<String> listId = [];
+
+  await fireStore.collection("hospitals").get()
+      .then((value){
+    for (var element in value.docs) {
+      hospitals.add(Hospital.fromJson(element.data()));
+      listId.add(element.id);
+    }
+  });
+
+  List listData = [];
+
+  for(var e in listId) {
+    await fireStore.collection("hospitals").doc(e).collection("doctors").get()
+        .then((value){
+      value.docs.forEach((element) {
+        print("doctor ${element.data()}");
+        listData.add(element.data());
+      });
+    });
+  }
+
+  return listData;
+}
 
 List<Student> students = [];
 
@@ -109,6 +171,39 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  late Future<List<Hospital>> _future;
+
+  bool isLoading = false;
+
+  List<Hospital> list = [];
+
+  List list1 = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _future = getAllHospital();
+
+    (() async {
+
+      list = await getAllHospital();
+
+      list1 = await getAllDoctor();
+
+      print("LENGTH ${list1.length}");
+
+      for (var element in list1) {
+        print(element);
+      }
+
+      setState(() {
+        isLoading = true;
+      });
+
+    })();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,17 +211,30 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: ListView.builder(
-          itemCount: students.length,
-          itemBuilder: (context, index) => Container(
-            color: Colors.red,
-            margin: const EdgeInsets.only(bottom: 10),
-            child: Text(
-              "${students[index].fullName} - ${students[index].delivery.province} - ${students[index].delivery.district} - ${students[index].delivery.ward}"
+        child: isLoading ? ListView.builder(
+            itemCount: list.length,
+            itemBuilder: (context, index) => Text(
+                "${list[index].address} ${list[index].service} ${list[index].operatingTime} ${list[index].knowledges[1]} ${list[index].information} ${list[index].star}"
             ),
-          ),
-        ),
-      ),
+      ) : const CircularProgressIndicator()),
+      //   child: FutureBuilder<List<Hospital>>(
+      //     future: _future,
+      //     builder: (context, snapshot) {
+      //     if (snapshot.connectionState == ConnectionState.waiting) {
+      //       return const Center(child: CircularProgressIndicator(),);
+      //     } else if (snapshot.hasError) {
+      //       return Center(child:  Text(snapshot.error.toString()),);
+      //     } else {
+      //       return ListView.builder(
+      //         itemCount: snapshot.data!.length,
+      //         itemBuilder: (context, index) => Text(
+      //             "${snapshot.data![index].address} ${snapshot.data![index].service} ${snapshot.data![index].operatingTime} ${snapshot.data![index].knowledges[1]} ${snapshot.data![index].information} ${snapshot.data![index].star}"
+      //         ),
+      //       );
+      //     }
+      //     },
+      //   ),
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',

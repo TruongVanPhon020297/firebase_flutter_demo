@@ -45,3 +45,42 @@ class Delivery {
   }
   
 }
+
+class Hospital {
+
+  final String image;
+  final String address;
+  final int star;
+  final String operatingTime;
+  final List service;
+  final String information;
+  final List knowledges;
+  final String hospitalName;
+
+  Hospital({
+    required this.image,
+    required this.address,
+    required this.star,
+    required this.hospitalName,
+    required this.information,
+    required this.knowledges,
+    required this.operatingTime,
+    required this.service
+  });
+
+  factory Hospital.fromJson(Map<String,dynamic> json) {
+
+    return Hospital(
+        image: json['image'],
+        address: json['address'],
+        star: json['star'],
+        hospitalName: json['hospital_name'],
+        information: json['information'],
+        knowledges: json['knowledges'],
+        operatingTime: json['operating_time'],
+        service: json['service']
+    );
+
+  }
+
+}
